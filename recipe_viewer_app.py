@@ -142,23 +142,18 @@ def main():
     option = st.sidebar.radio("Input type", ("Paste Link", "Upload File"))
 
     if option == "Paste Link":
-        
         if "url_input" not in st.session_state:
             st.session_state.url_input = ""
-        
+
         def clear_url():
             st.session_state.url_input = ""
-        
+
         url = st.sidebar.text_input("Enter a recipe page URL", value=st.session_state.url_input, key="url_input")
 
-        
-if st.sidebar.button("Process URL"):
-    extract_and_store_all_recipes(url, conn)
-    st.sidebar.success("Recipes extracted and saved!")
-    clear_url()
-
+        if st.sidebar.button("Process URL"):
             extract_and_store_all_recipes(url, conn)
             st.sidebar.success("Recipes extracted and saved!")
+            clear_url()
 
     elif option == "Upload File":
         uploaded_file = st.sidebar.file_uploader("Upload text file with recipes", type=["txt"])
@@ -167,7 +162,6 @@ if st.sidebar.button("Process URL"):
             st.sidebar.success("Recipes extracted and saved!")
 
     st.subheader("📌 Most Recently Added Recipe")
-
     c = conn.cursor()
     latest = c.execute("SELECT TOP 1 id, title FROM recipes ORDER BY id DESC").fetchone()
 
