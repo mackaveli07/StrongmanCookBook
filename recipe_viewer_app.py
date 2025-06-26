@@ -143,13 +143,13 @@ def main():
 
     if option == "Paste Link":
         
-if "url_input" not in st.session_state:
-    st.session_state.url_input = ""
-
-def clear_url():
-    st.session_state.url_input = ""
-
-url = st.sidebar.text_input("Enter a recipe page URL", value=st.session_state.url_input, key="url_input")
+        if "url_input" not in st.session_state:
+            st.session_state.url_input = ""
+        
+        def clear_url():
+            st.session_state.url_input = ""
+        
+        url = st.sidebar.text_input("Enter a recipe page URL", value=st.session_state.url_input, key="url_input")
 
         
 if st.sidebar.button("Process URL"):
