@@ -70,25 +70,41 @@ def split_recipes(text):
 
 def extract_ingredients(text):
     lines = text.splitlines()
-    return [
-        line.strip() for line in lines
-        if re.search(r"\d+\s?(cup|tsp|tbsp|g|grams|oz|ml|kg|lb|teaspoon|tablespoon)", line.lower())
-        or re.match(r"[-*•]\s", line.strip())
-    ]
+    clean_ingredients = []
+
+    for line in lines:
+        line = line.strip()
+        # Accept if it looks like a real ingredient measurement
+        if re.match(r"^[-*•]?\s*\d+(\.\d+)?\s?(cup|tsp|tbsp|g|gram|oz|ml|kg|lb|teaspoon|tablespoon|clove|slice|scoop|packet|can|stick)\b", line, re.IGNORECASE):
+            clean_ingredients.append(line)
+        # Accept bullet points or lines that include food + amount
+        elif re.match(r"^[-*•]?\s*\d+\s.*", line) and any(unit in line.lower() for unit in ["cup", "tsp", "tbsp", "oz", "g", "ml", "kg", "lb"]):
+            clean_ingredients.append(line)
+
+    return clean_ingredients
 
 def extract_instructions(text):
+    lines = text.splitlines()
     instructions = []
     found = False
-    for line in text.splitlines():
-        if any(w in line.lower() for w in ["instructions", "directions", "method"]):
+
+    for line in lines:
+        line = line.strip()
+
+        # Start capturing after instruction headers
+        if not found and any(h in line.lower() for h in ["instructions", "directions", "method"]):
             found = True
             continue
+
         if found:
-            if re.match(r"^\d+[\.\)]", line.strip()) or re.match(r"^(step\s)?\d+", line.lower()):
-                instructions.append(line.strip())
-            elif instructions:
-                instructions[-1] += " " + line.strip()
+            # Stop capturing at "macros", "nutrition", "course", etc.
+            if any(end in line.lower() for end in ["macros", "nutrition", "course", "calories", "psst"]):
+                break
+            if line and not line.lower().startswith("tag us") and len(line.split()) > 2:
+                instructions.append(line)
+
     return instructions
+
 
 def extract_macros(text):
     macros = {}
